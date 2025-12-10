@@ -1,0 +1,6 @@
+@PayWarden.WebAPI_HostAddress = http://localhost:5273
+
+GET {{PayWarden.WebAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
