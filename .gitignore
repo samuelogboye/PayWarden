@@ -1,0 +1,62 @@
+# Visual Studio / Rider / VS Code specific
+.vs/
+.vscode/
+.idea/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build outputs
+bin/
+obj/
+out/
+
+# NuGet packages
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+
+# Rider caches
+.idea/
+*.sln.iml
+
+# Logs
+*.log
+logs/
+*.tlg
+*.log.*
+
+# ASP.NET Core / Web
+wwwroot/lib/
+appsettings.*.json.user
+appsettings.*.Local.json
+
+# Entity Framework Core migrations snapshot
+Migrations/ModelSnapshot.cs
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.lock.json
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# Secrets (if any)
+secrets.json
+
+# Docker
+docker-compose.override.yml
+docker-compose.override.*.yml
+
+appsettings.Development.json
