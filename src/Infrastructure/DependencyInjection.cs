@@ -54,12 +54,19 @@ public static class DependencyInjection
         // Configure HMAC Settings for API Keys
         services.Configure<HmacSettings>(configuration.GetSection("HmacSettings"));
 
+        // Configure Paystack Settings
+        services.Configure<PaystackSettings>(configuration.GetSection("PaystackSettings"));
+
         // Add Services
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddScoped<IGoogleAuthService, GoogleAuthService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<IApiKeyService, ApiKeyService>();
         services.AddScoped<IApiKeyContext, ApiKeyContext>();
+        services.AddScoped<IPaystackWebhookValidator, PaystackWebhookValidator>();
+
+        // Add HttpClient for Paystack
+        services.AddHttpClient<IPaystackService, PaystackService>();
 
         // Add HttpContextAccessor
         services.AddHttpContextAccessor();
