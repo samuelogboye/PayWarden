@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PayWarden.Application.Wallets.Commands.InitiateDeposit;
 using PayWarden.Application.Wallets.Commands.ProcessPaystackWebhook;
+using PayWarden.Application.Wallets.Commands.TransferFunds;
 using PayWarden.Application.Wallets.Queries.GetDepositStatus;
 using PayWarden.Application.Wallets.Queries.GetWalletBalance;
 using PayWarden.Application.Wallets.Queries.GetWalletTransactions;
@@ -185,6 +186,48 @@ public class WalletController : ControllerBase
     }
 
     /// <summary>
+    /// Transfer funds to another wallet
+    /// </summary>
+    [HttpPost("transfer")]
+    [RequirePermission("transfer")]
+    [ProducesResponseType(typeof(TransferFundsResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> Transfer([FromBody] TransferFundsRequest request)
+    {
+        try
+        {
+            var command = new TransferFundsCommand(
+                request.RecipientWalletNumber,
+                request.Amount,
+                request.Description);
+
+            var result = await _mediator.Send(command);
+
+            _logger.LogInformation("Transfer successful: Reference {Reference}, Amount {Amount}, To {RecipientWallet}",
+                result.TransferReference, result.Amount, result.RecipientWalletNumber);
+
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning(ex, "Transfer failed");
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogWarning(ex, "Unauthorized attempt to transfer funds");
+            return Unauthorized(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error processing transfer");
+            return StatusCode(500, new { message = "An error occurred while processing the transfer" });
+        }
+    }
+
+    /// <summary>
     /// Paystack webhook endpoint for payment notifications
     /// </summary>
     [HttpPost("paystack/webhook")]
@@ -250,6 +293,11 @@ public class WalletController : ControllerBase
 }
 
 public record InitiateDepositRequest(decimal Amount);
+
+public record TransferFundsRequest(
+    string RecipientWalletNumber,
+    decimal Amount,
+    string? Description = null);
 
 // Paystack webhook payload models
 public class PaystackWebhookPayload
