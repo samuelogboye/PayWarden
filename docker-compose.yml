@@ -1,0 +1,46 @@
+services:
+  api:
+    container_name: paywarden-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+    volumes:
+      # Mount appsettings.Development.json into the container
+      - ./src/WebAPI/appsettings.Development.json:/app/appsettings.Development.json:ro
+    restart: unless-stopped
+    networks:
+      - paywarden-net
+
+  postgres:
+    container_name: paywarden-postgres
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: paywarden
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - paywarden-net
+
+volumes:
+  postgres_data:
+
+networks:
+  paywarden-net:
+    driver: bridge
