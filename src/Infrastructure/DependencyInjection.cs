@@ -51,10 +51,15 @@ public static class DependencyInjection
             };
         });
 
+        // Configure HMAC Settings for API Keys
+        services.Configure<HmacSettings>(configuration.GetSection("HmacSettings"));
+
         // Add Services
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddScoped<IGoogleAuthService, GoogleAuthService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddScoped<IApiKeyService, ApiKeyService>();
+        services.AddScoped<IApiKeyContext, ApiKeyContext>();
 
         // Add HttpContextAccessor
         services.AddHttpContextAccessor();
