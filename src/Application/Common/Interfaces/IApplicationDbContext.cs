@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using PayWarden.Domain.Entities;
 
 namespace PayWarden.Application.Common.Interfaces;
@@ -11,6 +12,8 @@ public interface IApplicationDbContext
     DbSet<Transaction> Transactions { get; }
     DbSet<WalletTransfer> WalletTransfers { get; }
     DbSet<WebhookEvent> WebhookEvents { get; }
+
+    DatabaseFacade Database { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
