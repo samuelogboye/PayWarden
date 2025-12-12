@@ -1,5 +1,6 @@
 using PayWarden.Application;
 using PayWarden.Infrastructure;
+using PayWarden.Infrastructure.Auth;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,6 +35,15 @@ builder.Services.AddSwaggerGen(options =>
         Description = "JWT Authorization header using the Bearer scheme. Enter your token in the text input below."
     });
 
+    // Add API Key Authentication to Swagger
+    options.AddSecurityDefinition("ApiKey", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Name = "x-api-key",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "API Key for service-to-service authentication"
+    });
+
     options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
     {
         {
@@ -43,6 +53,17 @@ builder.Services.AddSwaggerGen(options =>
                 {
                     Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
                     Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        },
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "ApiKey"
                 }
             },
             Array.Empty<string>()
@@ -82,6 +103,7 @@ app.UseSerilogRequestLogging();
 
 app.UseCors("AllowAll");
 app.UseAuthentication();
+app.UseApiKeyAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
