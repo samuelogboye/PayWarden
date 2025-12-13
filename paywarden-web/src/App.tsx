@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import LoginPage from '@/pages/LoginPage';
 import DashboardPage from '@/pages/DashboardPage';
+import DepositPage from '@/pages/DepositPage';
+import DepositCallbackPage from '@/pages/DepositCallbackPage';
 import { ReactNode } from 'react';
 
 interface PrivateRouteProps {
@@ -23,6 +25,22 @@ function App() {
           element={
             <PrivateRoute>
               <DashboardPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/deposit"
+          element={
+            <PrivateRoute>
+              <DepositPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/deposit/callback"
+          element={
+            <PrivateRoute>
+              <DepositCallbackPage />
             </PrivateRoute>
           }
         />
