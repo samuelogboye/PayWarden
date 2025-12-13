@@ -158,7 +158,12 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+// HTTPS should NOT be forced in Docker
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
 app.UseSerilogRequestLogging();
 
 // Rate limiting should come early in the pipeline
