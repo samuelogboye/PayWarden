@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTransfer } from '@/hooks/useTransfer';
 import { useWalletBalance } from '@/hooks/useWallet';
+import { useResolveWallet } from '@/hooks/useResolveWallet';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
@@ -21,6 +22,7 @@ const transferSchema = z.object({
     .min(1, 'Amount must be greater than 0')
     .max(10000000, 'Maximum transfer is ₦10,000,000'),
   description: z.string().optional(),
+  recipientAccountName: z.string().optional(),
 });
 
 type TransferFormData = z.infer<typeof transferSchema>;
@@ -55,6 +57,13 @@ export function TransferForm() {
   const insufficientBalance = amount > (balance?.balance || 0);
   const isSameWallet = recipientWalletNumber === balance?.walletNumber;
 
+  const {
+    data: resolvedWallet,
+    isLoading: resolvingWallet,
+    isError: resolveError,
+    error: resolveErrorData,
+  } = useResolveWallet(recipientWalletNumber);
+
   const onSubmit = (data: TransferFormData) => {
     if (insufficientBalance) {
       toast.error('Insufficient balance');
@@ -64,7 +73,10 @@ export function TransferForm() {
       toast.error("You can't transfer to your own wallet");
       return;
     }
-    setFormData(data);
+    setFormData({
+      ...data,
+      recipientAccountName: resolvedWallet?.accountName,
+    });
     setShowConfirm(true);
   };
 
@@ -125,6 +137,13 @@ export function TransferForm() {
 
         {/* Transfer Details */}
         <div className="bg-gray-50 rounded-lg p-6 space-y-4">
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-gray-600">Recipient Name</span>
+            <span className="font-semibold text-gray-900">
+              {formData.recipientAccountName}
+            </span>
+          </div>
+
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-600">Recipient Wallet</span>
             <span className="font-mono font-semibold text-gray-900">
@@ -265,6 +284,21 @@ export function TransferForm() {
           </p>
         )}
       </div>
+      {resolvingWallet && (
+                <p className="mt-1 text-sm text-gray-500">Resolving account…</p>
+              )}
+
+              {resolvedWallet?.accountName && (
+                <p className="mt-1 text-sm font-medium text-green-600">
+                  {resolvedWallet.accountName}
+                </p>
+              )}
+
+              {resolveError && recipientWalletNumber?.length >= 10 && (
+                <p className="mt-1 text-sm text-red-600">
+                  Wallet number not found
+                </p>
+              )}
 
       {/* Amount */}
       <div>
