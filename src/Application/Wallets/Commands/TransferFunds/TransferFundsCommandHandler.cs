@@ -29,6 +29,12 @@ public class TransferFundsCommandHandler : IRequestHandler<TransferFundsCommand,
         var userId = _currentUserService.UserId
             ?? throw new UnauthorizedAccessException("User is not authenticated");
 
+        // Validate amount
+        if (request.Amount <= 0)
+        {
+            throw new InvalidOperationException("Transfer amount must be greater than zero");
+        }
+
         // Get sender wallet with row-level locking for concurrency control
         var senderWallet = await _context.Wallets
             .FirstOrDefaultAsync(w => w.UserId == userId, cancellationToken)
