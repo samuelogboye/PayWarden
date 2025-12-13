@@ -40,6 +40,12 @@ public class InitiateDepositCommandHandler : IRequestHandler<InitiateDepositComm
             throw new InvalidOperationException("User or wallet not found");
         }
 
+        // Validate amount
+        if (request.Amount <= 0)
+        {
+            throw new InvalidOperationException("Deposit amount must be greater than zero");
+        }
+
         // Generate unique reference
         var reference = $"DEP_{Guid.NewGuid():N}";
 
