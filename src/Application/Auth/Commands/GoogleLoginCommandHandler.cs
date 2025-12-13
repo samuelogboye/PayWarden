@@ -78,8 +78,8 @@ public class GoogleLoginCommandHandler : IRequestHandler<GoogleLoginCommand, Aut
 
     private static string GenerateWalletNumber()
     {
-        // Generate a 13-digit wallet number
+        // Generate a 10-digit wallet number
         var random = new Random();
-        return string.Join("", Enumerable.Range(0, 13).Select(_ => random.Next(0, 10)));
+        return string.Join("", Enumerable.Range(0, 10).Select(_ => random.Next(0, 10)));
     }
 }
