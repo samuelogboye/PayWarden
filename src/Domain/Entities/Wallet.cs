@@ -7,7 +7,7 @@ public class Wallet : BaseEntity
     public string WalletNumber { get; set; } = string.Empty;
     public decimal Balance { get; set; }
     public Guid UserId { get; set; }
-    public byte[] RowVersion { get; set; } = Array.Empty<byte>(); // For concurrency control
+    public uint Version { get; set; } // For concurrency control using xmin
 
     // Navigation properties
     public User User { get; set; } = null!;

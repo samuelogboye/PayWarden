@@ -24,9 +24,12 @@ public class WalletConfiguration : IEntityTypeConfiguration<Wallet>
         builder.Property(w => w.UserId)
             .IsRequired();
 
-        // Concurrency token
-        builder.Property(w => w.RowVersion)
-            .IsRowVersion();
+        // Concurrency token using PostgreSQL's xmin system column
+        builder.Property(w => w.Version)
+            .IsRowVersion()
+            .HasColumnName("xmin")
+            .HasColumnType("xid")
+            .ValueGeneratedOnAddOrUpdate();
 
         // One-to-many relationship with Transactions
         builder.HasMany(w => w.Transactions)
