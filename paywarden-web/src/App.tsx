@@ -5,6 +5,7 @@ import DashboardPage from '@/pages/DashboardPage';
 import DepositPage from '@/pages/DepositPage';
 import DepositCallbackPage from '@/pages/DepositCallbackPage';
 import TransferPage from '@/pages/TransferPage';
+import ApiKeysPage from '@/pages/ApiKeysPage';
 import { ReactNode } from 'react';
 
 interface PrivateRouteProps {
@@ -50,6 +51,14 @@ function App() {
           element={
             <PrivateRoute>
               <TransferPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/api-keys"
+          element={
+            <PrivateRoute>
+              <ApiKeysPage />
             </PrivateRoute>
           }
         />
