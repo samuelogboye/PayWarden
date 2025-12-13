@@ -16,7 +16,6 @@ builder.Host.UseSerilog();
 
 // Add services to the container
 builder.Services.AddControllers();
-builder.Services.AddHealthChecks();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -77,6 +76,13 @@ builder.Services.AddSwaggerGen(options =>
 // Add Application and Infrastructure layers
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+
+// Add Health Checks with Database connectivity check
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<PayWarden.Infrastructure.Persistence.ApplicationDbContext>(
+        name: "database",
+        failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy,
+        tags: new[] { "db", "postgres" });
 
 // Add CORS
 builder.Services.AddCors(options =>
@@ -145,6 +151,9 @@ builder.Services.AddRateLimiter(options =>
 
 var app = builder.Build();
 
+// Verify database connectivity on startup
+await CheckDatabaseHealthAsync(app.Services);
+
 // Configure the HTTP request pipeline
 // Global exception handler should be first
 app.UseGlobalExceptionHandler();
@@ -189,4 +198,35 @@ catch (Exception ex)
 finally
 {
     Log.CloseAndFlush();
+}
+
+static async Task CheckDatabaseHealthAsync(IServiceProvider services)
+{
+    using var scope = services.CreateScope();
+    var healthCheckService = scope.ServiceProvider.GetRequiredService<Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckService>();
+
+    Log.Information("Checking database connectivity...");
+
+    var healthReport = await healthCheckService.CheckHealthAsync();
+
+    if (healthReport.Status != Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Healthy)
+    {
+        Log.Fatal("Database health check failed. Status: {Status}", healthReport.Status);
+
+        foreach (var entry in healthReport.Entries)
+        {
+            if (entry.Value.Status != Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Healthy)
+            {
+                Log.Fatal("Health check '{Name}' failed: {Description} | Exception: {Exception}",
+                    entry.Key,
+                    entry.Value.Description ?? "No description",
+                    entry.Value.Exception?.Message ?? "No exception");
+            }
+        }
+
+        Log.Fatal("Application startup aborted due to database connectivity issues");
+        Environment.Exit(1);
+    }
+
+    Log.Information("Database connectivity verified successfully");
 }
