@@ -73,10 +73,10 @@ public class TransferFundsCommandHandler : IRequestHandler<TransferFundsCommand,
                 CreditTransactionId = Guid.Empty // Temporary, will update
             };
 
-            // Create debit transaction for sender
+            // Create debit transaction for sender (unique reference)
             var debitTransaction = new Transaction
             {
-                Reference = transferReference,
+                Reference = $"{transferReference}_DEBIT",
                 Type = TransactionType.TransferDebit,
                 Amount = request.Amount,
                 WalletId = senderWallet.Id,
@@ -84,10 +84,10 @@ public class TransferFundsCommandHandler : IRequestHandler<TransferFundsCommand,
                 Description = request.Description ?? $"Transfer to {recipientWallet.WalletNumber}"
             };
 
-            // Create credit transaction for recipient
+            // Create credit transaction for recipient (unique reference)
             var creditTransaction = new Transaction
             {
-                Reference = transferReference,
+                Reference = $"{transferReference}_CREDIT",
                 Type = TransactionType.TransferCredit,
                 Amount = request.Amount,
                 WalletId = recipientWallet.Id,

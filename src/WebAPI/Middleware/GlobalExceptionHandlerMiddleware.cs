@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using FluentValidation;
 
 namespace PayWarden.WebAPI.Middleware;
 
@@ -38,6 +39,34 @@ public class GlobalExceptionHandlerMiddleware
     {
         context.Response.ContentType = "application/json";
 
+        // Handle ValidationException separately to include validation errors
+        if (exception is ValidationException validationException)
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+            var validationResponse = new ValidationErrorResponse
+            {
+                StatusCode = (int)HttpStatusCode.BadRequest,
+                Message = "One or more validation errors occurred",
+                Timestamp = DateTime.UtcNow,
+                Path = context.Request.Path,
+                Errors = validationException.Errors
+                    .GroupBy(e => e.PropertyName)
+                    .ToDictionary(
+                        g => ToCamelCase(g.Key),
+                        g => g.Select(e => e.ErrorMessage).ToArray())
+            };
+
+            var options = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            };
+
+            await context.Response.WriteAsync(JsonSerializer.Serialize(validationResponse, options));
+            return;
+        }
+
         var (statusCode, message) = exception switch
         {
             UnauthorizedAccessException => (HttpStatusCode.Unauthorized, "Unauthorized access"),
@@ -59,13 +88,21 @@ public class GlobalExceptionHandlerMiddleware
             Details = _environment.IsDevelopment() ? exception.ToString() : null
         };
 
-        var options = new JsonSerializerOptions
+        var responseOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             WriteIndented = true
         };
 
-        await context.Response.WriteAsync(JsonSerializer.Serialize(response, options));
+        await context.Response.WriteAsync(JsonSerializer.Serialize(response, responseOptions));
+    }
+
+    private static string ToCamelCase(string str)
+    {
+        if (string.IsNullOrEmpty(str) || char.IsLower(str[0]))
+            return str;
+
+        return char.ToLowerInvariant(str[0]) + str.Substring(1);
     }
 }
 
@@ -76,6 +113,15 @@ public class ErrorResponse
     public DateTime Timestamp { get; set; }
     public string Path { get; set; } = string.Empty;
     public string? Details { get; set; }
+}
+
+public class ValidationErrorResponse
+{
+    public int StatusCode { get; set; }
+    public string Message { get; set; } = string.Empty;
+    public DateTime Timestamp { get; set; }
+    public string Path { get; set; } = string.Empty;
+    public Dictionary<string, string[]> Errors { get; set; } = new();
 }
 
 public static class GlobalExceptionHandlerMiddlewareExtensions
