@@ -9,6 +9,7 @@ using PayWarden.Application.Wallets.Commands.TransferFunds;
 using PayWarden.Application.Wallets.Queries.GetDepositStatus;
 using PayWarden.Application.Wallets.Queries.GetWalletBalance;
 using PayWarden.Application.Wallets.Queries.GetWalletTransactions;
+using PayWarden.Application.Wallets.Queries.ResolveWalletNumber;
 using PayWarden.Infrastructure.Services;
 using PayWarden.WebAPI.Authorization;
 
@@ -61,6 +62,38 @@ public class WalletController : ControllerBase
         {
             _logger.LogError(ex, "Error retrieving wallet balance");
             return StatusCode(500, new { message = "An error occurred while retrieving wallet balance" });
+        }
+    }
+
+    /// <summary>
+    /// Resolve wallet number to account name
+    /// </summary>
+    [HttpGet("resolve/{walletNumber}")]
+    [ProducesResponseType(typeof(ResolveWalletNumberResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> ResolveWalletNumber(string walletNumber)
+    {
+        try
+        {
+            var query = new ResolveWalletNumberQuery { WalletNumber = walletNumber };
+            var result = await _mediator.Send(query);
+
+            _logger.LogInformation("Wallet number resolved: {WalletNumber} -> {AccountName}",
+                walletNumber, result.AccountName);
+
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning(ex, "Wallet not found: {WalletNumber}", walletNumber);
+            return NotFound(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error resolving wallet number");
+            return StatusCode(500, new { message = "An error occurred while resolving wallet number" });
         }
     }
 
@@ -123,31 +156,13 @@ public class WalletController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> InitiateDeposit([FromBody] InitiateDepositRequest request)
     {
-        try
-        {
-            var command = new InitiateDepositCommand(request.Amount);
-            var result = await _mediator.Send(command);
+        var command = new InitiateDepositCommand(request.Amount);
+        var result = await _mediator.Send(command);
 
-            _logger.LogInformation("Deposit initiated: Reference {Reference}, Amount {Amount}",
-                result.Reference, result.Amount);
+        _logger.LogInformation("Deposit initiated: Reference {Reference}, Amount {Amount}",
+            result.Reference, result.Amount);
 
-            return Ok(result);
-        }
-        catch (InvalidOperationException ex)
-        {
-            _logger.LogWarning(ex, "Failed to initiate deposit");
-            return BadRequest(new { message = ex.Message });
-        }
-        catch (UnauthorizedAccessException ex)
-        {
-            _logger.LogWarning(ex, "Unauthorized attempt to initiate deposit");
-            return Unauthorized(new { message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error initiating deposit");
-            return StatusCode(500, new { message = "An error occurred while initiating deposit" });
-        }
+        return Ok(result);
     }
 
     /// <summary>
@@ -161,28 +176,10 @@ public class WalletController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetDepositStatus(string reference)
     {
-        try
-        {
-            var query = new GetDepositStatusQuery(reference);
-            var result = await _mediator.Send(query);
+        var query = new GetDepositStatusQuery(reference);
+        var result = await _mediator.Send(query);
 
-            return Ok(result);
-        }
-        catch (InvalidOperationException ex)
-        {
-            _logger.LogWarning(ex, "Transaction not found: {Reference}", reference);
-            return NotFound(new { message = ex.Message });
-        }
-        catch (UnauthorizedAccessException ex)
-        {
-            _logger.LogWarning(ex, "Unauthorized attempt to check deposit status");
-            return Unauthorized(new { message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error checking deposit status");
-            return StatusCode(500, new { message = "An error occurred while checking deposit status" });
-        }
+        return Ok(result);
     }
 
     /// <summary>
@@ -196,35 +193,17 @@ public class WalletController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> Transfer([FromBody] TransferFundsRequest request)
     {
-        try
-        {
-            var command = new TransferFundsCommand(
+        var command = new TransferFundsCommand(
                 request.RecipientWalletNumber,
                 request.Amount,
                 request.Description);
 
-            var result = await _mediator.Send(command);
+        var result = await _mediator.Send(command);
 
-            _logger.LogInformation("Transfer successful: Reference {Reference}, Amount {Amount}, To {RecipientWallet}",
-                result.TransferReference, result.Amount, result.RecipientWalletNumber);
+        _logger.LogInformation("Transfer successful: Reference {Reference}, Amount {Amount}, To {RecipientWallet}",
+            result.TransferReference, result.Amount, result.RecipientWalletNumber);
 
-            return Ok(result);
-        }
-        catch (InvalidOperationException ex)
-        {
-            _logger.LogWarning(ex, "Transfer failed");
-            return BadRequest(new { message = ex.Message });
-        }
-        catch (UnauthorizedAccessException ex)
-        {
-            _logger.LogWarning(ex, "Unauthorized attempt to transfer funds");
-            return Unauthorized(new { message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error processing transfer");
-            return StatusCode(500, new { message = "An error occurred while processing the transfer" });
-        }
+        return Ok(result);
     }
 
     /// <summary>
