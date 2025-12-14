@@ -22,6 +22,7 @@ export function DepositForm() {
     handleSubmit,
     formState: { errors },
     watch,
+    setValue,
   } = useForm<DepositFormData>({
     resolver: zodResolver(depositSchema),
     defaultValues: {
@@ -75,21 +76,16 @@ export function DepositForm() {
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Quick Select
         </label>
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {quickAmounts.map((amt) => (
             <button
               key={amt}
               type="button"
-              onClick={() => {
-                const event = {
-                  target: { value: amt.toString(), valueAsNumber: amt },
-                } as any;
-                register('amount').onChange(event);
-              }}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              onClick={() => setValue('amount', amt, { shouldValidate: true })}
+              className={`px-4 py-3 rounded-lg text-sm font-semibold transition-all border-2 ${
                 amount === amt
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-primary-600 text-white border-primary-600 shadow-md scale-105'
+                  : 'bg-white text-gray-700 border-gray-200 hover:border-primary-300 hover:bg-primary-50'
               }`}
             >
               ₦{amt.toLocaleString()}

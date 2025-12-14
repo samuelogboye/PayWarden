@@ -42,6 +42,7 @@ export function TransferForm() {
     formState: { errors },
     watch,
     reset,
+    setValue,
   } = useForm<TransferFormData>({
     resolver: zodResolver(transferSchema),
     defaultValues: {
@@ -56,6 +57,11 @@ export function TransferForm() {
 
   const insufficientBalance = amount > (balance?.balance || 0);
   const isSameWallet = recipientWalletNumber === balance?.walletNumber;
+
+  // Quick amount suggestions based on balance
+  const quickAmounts = [1000, 5000, 10000, 50000].filter(
+    amt => amt <= (balance?.balance || 0)
+  );
 
   const {
     data: resolvedWallet,
@@ -323,6 +329,31 @@ export function TransferForm() {
           <p className="mt-1 text-sm text-red-600">
             Insufficient balance. You need {formatCurrency(amount - (balance?.balance || 0))} more.
           </p>
+        )}
+
+        {/* Quick Amount Selection */}
+        {quickAmounts.length > 0 && (
+          <div className="mt-3">
+            <label className="block text-xs font-medium text-gray-500 mb-2">
+              Quick Select
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {quickAmounts.map((amt) => (
+                <button
+                  key={amt}
+                  type="button"
+                  onClick={() => setValue('amount', amt, { shouldValidate: true })}
+                  className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all border-2 ${
+                    amount === amt
+                      ? 'bg-primary-600 text-white border-primary-600 shadow-md'
+                      : 'bg-white text-gray-700 border-gray-200 hover:border-primary-300 hover:bg-primary-50'
+                  }`}
+                >
+                  ₦{amt.toLocaleString()}
+                </button>
+              ))}
+            </div>
+          </div>
         )}
       </div>
 
