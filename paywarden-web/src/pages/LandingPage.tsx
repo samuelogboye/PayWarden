@@ -270,7 +270,7 @@ export default function LandingPage() {
           </p>
           <Button
             onClick={handleGetStarted}
-            className="bg-white text-primary-600 hover:bg-gray-100 px-8 py-4 text-lg"
+            className="bg-white !text-primary-600 hover:bg-gray-100 px-8 py-4 text-lg"
           >
             Create Your Free Account
           </Button>
