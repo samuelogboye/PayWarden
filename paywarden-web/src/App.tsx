@@ -1,12 +1,17 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { lazy, Suspense, ReactNode } from 'react';
 import { useAuthStore } from '@/stores/authStore';
-import LoginPage from '@/pages/LoginPage';
-import DashboardPage from '@/pages/DashboardPage';
-import DepositPage from '@/pages/DepositPage';
-import DepositCallbackPage from '@/pages/DepositCallbackPage';
-import TransferPage from '@/pages/TransferPage';
-import ApiKeysPage from '@/pages/ApiKeysPage';
-import { ReactNode } from 'react';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { DashboardSkeleton } from '@/components/ui/Skeleton';
+
+// Lazy load pages for code splitting
+const LoginPage = lazy(() => import('@/pages/LoginPage'));
+const DashboardPage = lazy(() => import('@/pages/DashboardPage'));
+const DepositPage = lazy(() => import('@/pages/DepositPage'));
+const DepositCallbackPage = lazy(() => import('@/pages/DepositCallbackPage'));
+const TransferPage = lazy(() => import('@/pages/TransferPage'));
+const ApiKeysPage = lazy(() => import('@/pages/ApiKeysPage'));
+const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 
 interface PrivateRouteProps {
   children: ReactNode;
@@ -17,55 +22,69 @@ function PrivateRoute({ children }: PrivateRouteProps) {
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
 }
 
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-7xl mx-auto">
+        <DashboardSkeleton />
+      </div>
+    </div>
+  );
+}
+
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route
-          path="/dashboard"
-          element={
-            <PrivateRoute>
-              <DashboardPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/deposit"
-          element={
-            <PrivateRoute>
-              <DepositPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/deposit/callback"
-          element={
-            <PrivateRoute>
-              <DepositCallbackPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/transfer"
-          element={
-            <PrivateRoute>
-              <TransferPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/api-keys"
-          element={
-            <PrivateRoute>
-              <ApiKeysPage />
-            </PrivateRoute>
-          }
-        />
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
-      </Routes>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <Suspense fallback={<LoadingFallback />}>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route
+              path="/dashboard"
+              element={
+                <PrivateRoute>
+                  <DashboardPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/deposit"
+              element={
+                <PrivateRoute>
+                  <DepositPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/deposit/callback"
+              element={
+                <PrivateRoute>
+                  <DepositCallbackPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/transfer"
+              element={
+                <PrivateRoute>
+                  <TransferPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/api-keys"
+              element={
+                <PrivateRoute>
+                  <ApiKeysPage />
+                </PrivateRoute>
+              }
+            />
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </Suspense>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }
 

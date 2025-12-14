@@ -25,9 +25,14 @@ export default defineConfig({
         manualChunks: {
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
           'query-vendor': ['@tanstack/react-query'],
-          'form-vendor': ['react-hook-form', 'zod'],
+          'form-vendor': ['react-hook-form', 'zod', '@hookform/resolvers'],
+          'auth-vendor': ['@react-oauth/google'],
+          'ui-vendor': ['react-hot-toast', 'clsx'],
         },
       },
     },
+    sourcemap: false,
+    minify: 'terser',
+    chunkSizeWarningLimit: 1000,
   },
 });
