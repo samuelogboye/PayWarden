@@ -3,6 +3,7 @@ import { useApiKeys, useRolloverApiKey } from '@/hooks/useApiKeys';
 import { Button } from '@/components/ui/Button';
 import { formatDate } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import type { AxiosError } from "axios";
 import { ApiKeyModal } from './ApiKeyModal';
 
 export function ApiKeysList() {
@@ -20,8 +21,9 @@ export function ApiKeysList() {
       setNewKey(result.apiKey);
       setRolloverKeyId(null);
       toast.success('API key rolled over successfully');
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Rollover failed');
+    } catch (error: unknown) {
+      const err = error as AxiosError<{ message: string }>;
+      toast.error(err.response?.data?.message || 'Rollover failed');
     }
   };
 

@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { formatCurrency } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import type { AxiosError } from "axios";
 
 const transferSchema = z.object({
   recipientWalletNumber: z
@@ -67,7 +68,6 @@ export function TransferForm() {
     data: resolvedWallet,
     isLoading: resolvingWallet,
     isError: resolveError,
-    error: resolveErrorData,
   } = useResolveWallet(recipientWalletNumber);
 
   const onSubmit = (data: TransferFormData) => {
@@ -107,8 +107,9 @@ export function TransferForm() {
       setTimeout(() => {
         navigate('/dashboard');
       }, 1500);
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Transfer failed';
+    } catch (error: unknown) {
+      const err = error as AxiosError<{ message: string }>;
+      const errorMessage = err.response?.data?.message || 'Transfer failed';
       toast.error(errorMessage);
       setShowConfirm(false);
     }

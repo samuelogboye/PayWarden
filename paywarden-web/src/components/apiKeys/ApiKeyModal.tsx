@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { copyToClipboard } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import type { AxiosError } from "axios";
 
 interface ApiKeyModalProps {
   apiKey: string;
@@ -17,8 +18,9 @@ export function ApiKeyModal({ apiKey, onClose }: ApiKeyModalProps) {
       setCopied(true);
       toast.success('API key copied to clipboard');
       setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
-      toast.error('Failed to copy to clipboard');
+    } catch (error: unknown) {
+      const err = error as AxiosError<{ message: string }>;
+      toast.error(err.response?.data?.message || 'Failed to copy to clipboard');
     }
   };
 

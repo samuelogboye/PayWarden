@@ -6,6 +6,7 @@ import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { AuthResponse } from '@/types';
 import { Card, CardContent } from '@/components/ui/Card';
+import type { AxiosError } from "axios";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ export default function LoginPage() {
       toast.success('Welcome to PayWarden!');
       navigate('/dashboard');
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<{ message: string }>) => {
       const message = error.response?.data?.message || 'Login failed. Please try again.';
       toast.error(message);
     },

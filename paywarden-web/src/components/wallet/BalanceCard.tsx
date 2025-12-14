@@ -1,5 +1,6 @@
 import { useWalletBalance } from '@/hooks/useWallet';
 import { formatCurrency } from '@/lib/utils';
+import type { AxiosError } from "axios";
 
 export function BalanceCard() {
   const { data: balance, isLoading, error } = useWalletBalance();
@@ -20,7 +21,7 @@ export function BalanceCard() {
           <div>
             <h3 className="text-sm font-medium text-red-800">Failed to load balance</h3>
             <p className="text-sm text-red-600 mt-1">
-              {(error as any)?.response?.data?.message || 'Please try refreshing the page'}
+              {(error as AxiosError<{ message: string }>)?.response?.data?.message || 'Please try refreshing the page'}
             </p>
           </div>
         </div>

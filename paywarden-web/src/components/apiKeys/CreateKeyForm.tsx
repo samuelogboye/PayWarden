@@ -6,6 +6,7 @@ import { useCreateApiKey } from '@/hooks/useApiKeys';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import toast from 'react-hot-toast';
+import type { AxiosError } from "axios";
 
 const PERMISSIONS = [
   {
@@ -106,8 +107,9 @@ export function CreateKeyForm({ onSuccess }: CreateKeyFormProps) {
       reset();
       setSelectedPermissions(['read']);
       onSuccess(result.apiKey);
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to create API key');
+    } catch (error: unknown) {
+      const err = error as AxiosError<{ message: string }>;
+      toast.error(err.response?.data?.message || 'Failed to create API key');
     }
   };
 

@@ -5,6 +5,7 @@ import { useInitiateDeposit } from '@/hooks/useDeposit';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import toast from 'react-hot-toast';
+import type { AxiosError } from "axios";
 
 const depositSchema = z.object({
   amount: z
@@ -38,9 +39,10 @@ export function DepositForm() {
 
       // Redirect to Paystack
       window.location.href = result.authorizationUrl;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as AxiosError<{ message: string }>;
       toast.error(
-        error.response?.data?.message || 'Failed to initiate deposit'
+        err.response?.data?.message || 'Failed to initiate deposit'
       );
     }
   };
