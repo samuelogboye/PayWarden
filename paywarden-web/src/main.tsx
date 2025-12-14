@@ -4,7 +4,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { Toaster } from 'react-hot-toast';
 import App from './App';
+import { validateEnv, env } from './lib/env';
 import './index.css';
+
+// Validate environment variables before starting the app
+validateEnv();
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -16,15 +20,9 @@ const queryClient = new QueryClient({
   },
 });
 
-const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
-
-if (!googleClientId) {
-  console.warn('VITE_GOOGLE_CLIENT_ID is not set. Google OAuth will not work.');
-}
-
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <GoogleOAuthProvider clientId={googleClientId}>
+    <GoogleOAuthProvider clientId={env.googleClientId}>
       <QueryClientProvider client={queryClient}>
         <App />
         <Toaster
