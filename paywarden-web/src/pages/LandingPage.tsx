@@ -298,18 +298,42 @@ export default function LandingPage() {
             <div>
               <h4 className="text-white font-semibold mb-4">Product</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Pricing</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">API</a></li>
+                <li>
+                  <button onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} className="hover:text-white transition-colors">
+                    Features
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => navigate('/login')} className="hover:text-white transition-colors">
+                    Get Started
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => navigate('/support')} className="hover:text-white transition-colors">
+                    API Docs
+                  </button>
+                </li>
               </ul>
             </div>
 
             <div>
               <h4 className="text-white font-semibold mb-4">Company</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">About</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Support</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Privacy</a></li>
+                <li>
+                  <button onClick={() => navigate('/about')} className="hover:text-white transition-colors">
+                    About
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => navigate('/support')} className="hover:text-white transition-colors">
+                    Support
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => navigate('/privacy')} className="hover:text-white transition-colors">
+                    Privacy
+                  </button>
+                </li>
               </ul>
             </div>
           </div>
