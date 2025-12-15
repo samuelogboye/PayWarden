@@ -7,6 +7,9 @@ import { DashboardSkeleton } from '@/components/ui/Skeleton';
 // Lazy load pages for code splitting
 const LandingPage = lazy(() => import('@/pages/LandingPage'));
 const LoginPage = lazy(() => import('@/pages/LoginPage'));
+const AboutPage = lazy(() => import('@/pages/AboutPage'));
+const PrivacyPage = lazy(() => import('@/pages/PrivacyPage'));
+const SupportPage = lazy(() => import('@/pages/SupportPage'));
 const DashboardPage = lazy(() => import('@/pages/DashboardPage'));
 const DepositPage = lazy(() => import('@/pages/DepositPage'));
 const DepositCallbackPage = lazy(() => import('@/pages/DepositCallbackPage'));
@@ -41,6 +44,9 @@ function App() {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/support" element={<SupportPage />} />
             <Route
               path="/dashboard"
               element={
