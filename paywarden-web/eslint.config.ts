@@ -2,31 +2,30 @@ import js from "@eslint/js";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 import react from "eslint-plugin-react";
-import { defineConfig } from "eslint/config";
 
-export default defineConfig([
+export default [
   // Base JS rules
   js.configs.recommended,
 
-  // TypeScript rules
-  tseslint.configs.recommended,
+  // TypeScript rules (scoped)
+  ...tseslint.configs.recommended,
 
-   {
+  // Ignore generated files
+  {
     ignores: [
       "**/dist/**",
       "**/build/**",
       "**/.next/**",
       "**/coverage/**",
       "**/node_modules/**",
-
-      // Common generated/vendor locations
       "**/vendor/**",
       "**/generated/**",
       "**/*.min.js",
       "**/*.bundle.js",
     ],
   },
-  // React rules (flat)
+
+  // React rules
   {
     ...react.configs.flat.recommended,
     settings: {
@@ -41,14 +40,13 @@ export default defineConfig([
     },
   },
 
-  // Application files
+  // Application rules
   {
     files: ["**/*.{js,jsx,ts,tsx}"],
     languageOptions: {
       globals: globals.browser,
     },
     rules: {
-      // Allow common React/TS patterns
       "@typescript-eslint/no-unused-expressions": [
         "error",
         {
@@ -58,7 +56,6 @@ export default defineConfig([
         },
       ],
 
-      // Ignore unused variables that start with _
       "@typescript-eslint/no-unused-vars": [
         "warn",
         {
@@ -68,10 +65,8 @@ export default defineConfig([
         },
       ],
 
-      // Do NOT block builds on this
       "@typescript-eslint/no-explicit-any": "warn",
 
-      // Reduce noise
       "no-empty": "warn",
       "no-func-assign": "error",
     },
@@ -87,4 +82,4 @@ export default defineConfig([
       "@typescript-eslint/no-unused-vars": "off",
     },
   },
-]);
+];
